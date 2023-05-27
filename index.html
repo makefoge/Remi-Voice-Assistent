@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Голосовой ассистент</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+    }
+
+    h1 {
+      margin-top: 50px;
+    }
+
+    button {
+      margin-top: 30px;
+      font-size: 16px;
+      font-weight: bold;
+      padding: 10px;
+      border-radius: 10px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    p {
+      margin-top: 30px;
+      font-size: 24px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Голосовой ассистент</h1>
+  <button id="start-btn">Начать</button>
+  <p id="text"></p>
+
+  <script>
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const synth = window.speechSynthesis;
+    const recognition = new SpeechRecognition();
+
+    const startBtn = document.getElementById("start-btn");
+    const text = document.getElementById("text");
+
+    let listening = false;
+
+    recognition.onstart = function () {
+      listening = true;
+      startBtn.innerHTML = "Остановить";
+    };
+
+    recognition.onend = function () {
+      listening = false;
+      startBtn.innerHTML = "Начать";
+    };
+
+    recognition.onresult = function (event) {
+      const speechText = event.results[0][0].transcript;
+      text.innerHTML = speechText;
+      respondToSpeech(speechText);
+    };
+    function respondToSpeech(speechText) {
+  if (speechText.includes("привет Реми")) {
+    speak("Привет, как дела?");
+  } else if (speechText.includes("как дела")) {
+    speak("У меня всё отлично, а у тебя?");
+  } else if (speechText.includes("хорошо")) {
+    speak("Отлично, что тебе нужно?");
+  } else if (speechText.includes("пока Реми")) {
+    speak("Пока, хорошего дня!");
+  } else if (speechText.includes("Реми какое сейчас время")) {
+    const time = new Date().toLocaleTimeString();
+    speak("Сейчас " + time);
+  } else if (speechText.includes("Реми скажи шутку")) {
+    speak('Пошутим про имию сэр боюсь реакции не будет')
+      .then(response => response.json())
+      .then(data => {
+         const description = data.weather[0].description;
+         const temperature = Math.round(data.main.temp - 273.15);
+      });
+  } else if (speechText.includes("Реми запусти приложение")) {
+    speak("Какое приложение вы хотите запустить?");
+    recognition.onresult = function (event) {
+      const appText = event.results[0][0].transcript;
+      if (appText.includes("фото")) {
+        speak("Открываю приложение Фото");
+        // Добавьте код для запуска приложения Фото
+        if (typeof window !== "undefined") {
+  // Получаем ссылку на объект Window
+  const win = window;
+
+  // Используем метод window.open() для открытия нового окна в браузере
+  win.open("https://photos.ru"); // открыть ФОто
+}
+      } else if (appText.includes("музыка")) {
+        speak("Открываю приложение Музыка");
+        // Добавьте код для запуска приложения Музыка 
+        // Проверяем, находится ли код в браузерном окружении
+if (typeof window !== "undefined") {
+  // Получаем ссылку на объект Window
+  const win = window;
+
+  // Используем метод window.open() для открытия нового окна в браузере
+  win.open("https://music.yandex.ru/"); // открыть Яндекс.Музыка
+}
+      } else {
+        speak("Извините, я не могу запустить запрашиваемое приложение");
+      }
+    };
+  } else if (speechText.includes(" Риме скажи шутку")) {
+    fetch('https://v2.jokeapi.dev/joke/Any?type=single&lang=ru')
+      .then(response => response.json())
+      .then(data => {
+        speak(data.setup);
+        setTimeout(function(){ speak(data.punchline); }, 3000);
+      });
+  } else {
+    speak("Прошу прощения, я вас не понимаю. " + speechText + " Такой команды не бывает.");
+  }
+}
+
+    function speak(text) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      synth.speak(utterance);
+    }
+
+    startBtn.addEventListener("click", () => {
+      if (listening) {
+        recognition.stop();
+      } else {
+        recognition.start();
+        text.innerHTML = "";
+      }
+    });
+    
+
+  </script>
+  <h1>Разработчики</h1>
+  <h2>makefoge</h2>
+  <p>makefoge создал этого голосового ассистента Реми буду рад донатом в стим</p>
+  <hr>
+  <h1><center>Что я умею</center></h1>
+  <h3>Я умею говорить время команда:Реми Какое сейчас время</h3>
+  <h3>Я умею шутить команда:Реми Скажи шутку</h3>
+  <h3>Я умею запускать приложения команда:Реми запусти приложение</h3>
+  <hr>
+  <footer><h4>@Powered by make</h4></footer>
+  <H3>Мой дискорд mkefoge#2169</H3>
+  <hr>
+</body>
+</html>
